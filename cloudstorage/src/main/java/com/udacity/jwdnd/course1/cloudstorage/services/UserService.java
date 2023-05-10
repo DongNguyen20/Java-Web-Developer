@@ -36,6 +36,10 @@ public class UserService {
     }
 
     public User getUser(String userName) {
-        return userMapper.getUser(userName);
+        try {
+            return userMapper.getUser(userName);
+        }catch (Exception e) {
+            return null;
+        }
     }
 }
