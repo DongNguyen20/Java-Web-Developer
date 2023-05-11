@@ -1,9 +1,11 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
+import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 
+import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,10 +23,12 @@ import java.util.Objects;
 public class HomeController {
     private UserService userService;
     private FileService fileService;
+    private NoteService notesService;
 
-    public HomeController(UserService userService, FileService fileService) {
+    public HomeController(UserService userService, FileService fileService, NoteService notesService) {
         this.userService = userService;
         this.fileService = fileService;
+        this.notesService = notesService;
     }
 
     @GetMapping
@@ -35,7 +39,9 @@ public class HomeController {
             User user = userService.getUser(username);
             if (Objects.nonNull(user)) {
                 List<File> files = fileService.findAllByUserId(user.getUserId());
+                List<Note> notes = notesService.findAllByUserId(user.getUserId());
                 model.addAttribute("listFile", files);
+                model.addAttribute("listNotes", notes);
             }
         }else {
             return "redirect:/login";
