@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.io.File;
+import java.util.List;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -200,6 +202,134 @@ class CloudStorageApplicationTests {
 
 	}
 
+	private final String NOTE_TITLE = "Note Title";
+	private void initNoteData(WebDriverWait webDriverWait) {
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonAddNote"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title"))).sendKeys(NOTE_TITLE);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description"))).sendKeys("Test Note Description");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonNoteSubmit"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("result-go-home"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab"))).click();
+	}
 
+	@Test
+	public void testAddNote() {
+		doMockSignUp("Large File","Test","LFTN0","123");
+		doLogIn("LFTN0", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 5);
+		initNoteData(webDriverWait);
+		Boolean found = webDriverWait.until(ExpectedConditions.textToBe(
+				By.xpath("//*[@id='noteTable']/tbody/tr/th"),
+				NOTE_TITLE)
+		);
+
+		Assertions.assertTrue(found);
+	}
+
+	@Test
+	public void testEditNote() {
+		doMockSignUp("Large File","Test","LFTN1","123");
+		doLogIn("LFTN1", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 5);
+		initNoteData(webDriverWait);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonEditNote1"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title"))).clear();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title"))).sendKeys(NOTE_TITLE);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description"))).clear();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description"))).sendKeys("Test Note Description Edit");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonNoteSubmit"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("result-go-home"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab"))).click();
+		Boolean found = webDriverWait.until(ExpectedConditions.textToBe(
+				By.xpath("//*[@id='noteTable']/tbody/tr/th"),
+				NOTE_TITLE)
+		);
+
+		Assertions.assertTrue(found);
+	}
+
+	@Test
+	public void testDeleteNote() {
+		doMockSignUp("Large File","Test","LFTN2","123");
+		doLogIn("LFTN2", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		initNoteData(webDriverWait);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteNote1"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("result-go-home"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab"))).click();
+		WebElement tableElement = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("noteTable")));
+		List<WebElement> listRow = tableElement.findElements(By.tagName("tr"));
+
+		Assertions.assertEquals(1, listRow.size());
+	}
+
+	private void initCredentialData(WebDriverWait webDriverWait) {
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonAddCredential"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url"))).sendKeys("http://localhost:8088/login");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username"))).sendKeys("username");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password"))).sendKeys("password");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonCredentialSubmit"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("result-go-home"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab"))).click();
+	}
+
+	@Test
+	public void testAddCredential() {
+		doMockSignUp("Large File","Test","LFTC0","123");
+		doLogIn("LFTC0", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 5);
+		initCredentialData(webDriverWait);
+		WebElement tableElement = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTable")));
+		List<WebElement> listRow = tableElement.findElements(By.tagName("tr"));
+		WebElement firstDataRow = listRow.get(1);
+		WebElement credentialUrlElement = firstDataRow.findElement(By.tagName("th"));
+
+		Assertions.assertEquals("http://localhost:8088/login", credentialUrlElement.getText());
+	}
+
+	@Test
+	public void testEditCredential() {
+		doMockSignUp("Large File","Test","LFTC1","123");
+		doLogIn("LFTC1", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 5);
+		initCredentialData(webDriverWait);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonEditCredential1"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url"))).clear();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url"))).sendKeys("http://localhost:8089/login");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username"))).clear();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username"))).sendKeys("bingchilling");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password"))).clear();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password"))).sendKeys("abxcaafxx21");
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("buttonCredentialSubmit"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("result-go-home"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab"))).click();
+		WebElement tableElement = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTable")));
+		List<WebElement> listRow = tableElement.findElements(By.tagName("tr"));
+		WebElement firstDataRow = listRow.get(1);
+		WebElement credentialUrlElement = firstDataRow.findElement(By.tagName("th"));
+		WebElement credentialUserNameElement = firstDataRow.findElements(By.tagName("td")).get(1);
+
+		Assertions.assertEquals("http://localhost:8089/login", credentialUrlElement.getText());
+		Assertions.assertEquals("bingchilling", credentialUserNameElement.getText());
+	}
+
+	@Test
+	public void testDeleteCredential() {
+		doMockSignUp("Large File","Test","LFTC2","123");
+		doLogIn("LFTC2", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		initCredentialData(webDriverWait);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteCredential1"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("result-go-home"))).click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab"))).click();
+		WebElement tableElement = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTable")));
+		List<WebElement> listRow = tableElement.findElements(By.tagName("tr"));
+		Assertions.assertEquals(1, listRow.size());
+	}
 
 }
