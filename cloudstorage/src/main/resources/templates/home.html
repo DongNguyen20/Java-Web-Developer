@@ -75,7 +75,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="note : ${listNotes}">
+                                    <tr th:each="note : ${listNote}">
                                         <td>
                                             <button type="button" class="btn btn-success" th:id="'buttonEditNote' + ${note.getNoteId()}"
                                                 th:onclick="javascript:showNoteModal([[${note.noteId}]], [[${note.noteTitle}]], [[${note.noteDescription}]])">Edit</button>
@@ -126,7 +126,7 @@
                         </button>
 
                         <div class="table-responsive">
-                            <table class="table table-striped" id="credentialTable">
+                            <table class="table table-striped"  th:object="${credentials}" id="credentialTable">
                                 <thead>
                                     <tr>
                                         <th style="width: 20%" scope="col"></th>
@@ -136,14 +136,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
+                                <tr th:each="credential : ${listCredential}">
                                     <td>
-                                        <button type="button" class="btn btn-success">Edit</button>
-                                        <a class="btn btn-danger">Delete</a>
+                                        <button type="button" class="btn btn-success" th:id="'buttonEditCredential' + ${credential.getCredentialId()}"
+                                                th:credential-url="${credential.getUrl()}"
+                                                th:credential-key="${credential.getKey()}"
+                                                th:credential-username="${credential.getUserName()}"
+                                                th:credential-password="${encryptionService.decryptValue(credential.getPassword(),credential.getKey())}"
+                                                th:credential-id="${credential.getCredentialId()}"
+                                                onclick="showCredentialModal(this.getAttribute('credential-id'),
+                                                    this.getAttribute('credential-url'),
+                                                    this.getAttribute('credential-username'),
+                                                    this.getAttribute('credential-password'),
+                                                    this.getAttribute('credential-key'))">
+                                            Edit
+                                        </button>
+                                        <a th:id="'deleteCredential' + ${credential.getCredentialId()}" th:href="@{'/credentials/delete/' + ${credential.getCredentialId()}}"
+                                           class="btn btn-danger">Delete</a>
                                     </td>
-                                    <th scope="row">Example Credential URL</th>
-                                    <td>Example Credential Username</td>
-                                    <td>Example Credential Password</td>
+                                    <th scope="row" th:text="${credential.getUrl()}"></th>
+                                    <td><span th:text="${credential.getUserName()}"></span></td>
+                                    <td th:text="${credential.getKey()}"></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -159,7 +172,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
+                                        <form action="#" th:action="@{/credentials}" method="POST">
                                             <input type="hidden" name="credentialId" id="credential-id">
                                             <div class="form-group">
                                                 <label for="credential-url" class="col-form-label">URL</label>
@@ -167,7 +180,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="credential-username" class="col-form-label">Username</label>
-                                                <input type="text" name= "username" class="form-control" id="credential-username" maxlength="30" required>
+                                                <input type="text" name= "userName" class="form-control" id="credential-username" maxlength="30" required>
                                             </div>
                                             <div class="form-group">
                                                 <label for="credential-password" class="col-form-label">Password</label>

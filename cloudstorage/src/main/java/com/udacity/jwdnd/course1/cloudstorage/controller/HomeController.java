@@ -1,8 +1,11 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.services.EncryptionService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
@@ -24,29 +27,34 @@ public class HomeController {
     private UserService userService;
     private FileService fileService;
     private NoteService notesService;
+    private CredentialService credentialService;
+    private EncryptionService encryptionService;
 
-    public HomeController(UserService userService, FileService fileService, NoteService notesService) {
+    public HomeController(UserService userService, EncryptionService encryptionService, FileService fileService, NoteService notesService, CredentialService credentialService) {
         this.userService = userService;
         this.fileService = fileService;
         this.notesService = notesService;
+        this.credentialService = credentialService;
+        this.encryptionService = encryptionService;
     }
 
     @GetMapping
-    public String goHomePage(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String goHomePage(Authentication authentication, Model model) {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String username = authentication.getName();
             User user = userService.getUser(username);
             if (Objects.nonNull(user)) {
                 List<File> files = fileService.findAllByUserId(user.getUserId());
                 List<Note> notes = notesService.findAllByUserId(user.getUserId());
+                List<Credential> credentials = credentialService.findAllByUserId(user.getUserId());
                 model.addAttribute("listFile", files);
-                model.addAttribute("listNotes", notes);
+                model.addAttribute("listNote", notes);
+                model.addAttribute("listCredential", credentials);
             }
         }else {
             return "redirect:/login";
         }
-
+        model.addAttribute("encryptionService",encryptionService);
         return "home";
     }
 }

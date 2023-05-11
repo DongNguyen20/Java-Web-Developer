@@ -45,7 +45,7 @@ public class NoteController {
             if (rs > 0) {
                 model.addAttribute("result", "success");
             } else {
-                model.addAttribute("message", "Cannot create Note!");
+                model.addAttribute("message", "Cannot update Note!");
             }
         }
         return "result";
@@ -54,7 +54,7 @@ public class NoteController {
     @GetMapping(path = "/delete/{id}")
     public String delete(@PathVariable Integer id, Model model) {
         try {
-            int rs = noteService.delete(id);
+            noteService.delete(id);
             model.addAttribute("result", "success");
         }catch (Exception e){
             model.addAttribute("result", "error");
